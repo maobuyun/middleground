@@ -2,7 +2,8 @@ import { Input, Space, Table, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { orders, statusMap, type Order } from '../data/orders';
+import { orders, statusMap, type Order } from '../../data/orders';
+import './index.less';
 
 const { Search } = Input;
 
@@ -67,7 +68,7 @@ export default function OrderList() {
   return (
     <div className="app-shell">
       <Typography.Title level={2}>订单列表</Typography.Title>
-      <Space direction="vertical" style={{ width: '100%', marginBottom: 16 }}>
+      <Space direction="vertical" className="order-list-search">
         <Search
           placeholder="搜索订单号、产品名称、负责人或状态"
           allowClear

@@ -1,7 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 import 'antd/dist/reset.css';
-import OrderDetail from './pages/OrderDetail';
-import OrderList from './pages/OrderList';
+import OrderDetail from './pages/detail/OrderDetail';
+import OrderList from './pages/list/OrderList';
 
 export default function App() {
   return (
