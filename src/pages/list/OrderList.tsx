@@ -1,11 +1,10 @@
-import { Input, Space, Table, Tag, Typography } from 'antd';
+import { Button, Input, Select, Space, Table, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { orders, statusMap, type Order } from '../../data/orders';
+import { orders, statusMap, type Order, type OrderStatus } from '../../data/orders';
 import './index.less';
-
-const { Search } = Input;
 
 const columns: ColumnsType<Order> = [
   {
@@ -50,34 +49,87 @@ const columns: ColumnsType<Order> = [
   },
 ];
 
+const statusOptions: { value: OrderStatus | ''; label: string }[] = [
+  { value: '', label: '全部' },
+  ...Object.keys(statusMap).map((key) => ({
+    value: key as OrderStatus,
+    label: key,
+  })),
+];
+
 export default function OrderList() {
-  const [keyword, setKeyword] = useState('');
+  const [filters, setFilters] = useState({
+    orderId: '',
+    product: '',
+    owner: '',
+    status: '' as OrderStatus | '',
+  });
 
   const filteredOrders = useMemo(
     () =>
       orders.filter((order) => {
-        const normalized = keyword.trim().toLowerCase();
-        if (!normalized) return true;
+        const orderIdMatch = !filters.orderId.trim() || order.orderId.toLowerCase().includes(filters.orderId.trim().toLowerCase());
+        const productMatch = !filters.product.trim() || order.product.toLowerCase().includes(filters.product.trim().toLowerCase());
+        const ownerMatch = !filters.owner.trim() || order.owner.toLowerCase().includes(filters.owner.trim().toLowerCase());
+        const statusMatch = !filters.status || order.status === filters.status;
 
-        return [order.orderId, order.product, order.owner, order.status]
-          .some((value) => value.toLowerCase().includes(normalized));
+        return orderIdMatch && productMatch && ownerMatch && statusMatch;
       }),
-    [keyword],
+    [filters],
   );
+
+  const handleReset = () => {
+    setFilters({ orderId: '', product: '', owner: '', status: '' });
+  };
+
+  const hasFilter = filters.orderId || filters.product || filters.owner || filters.status;
 
   return (
     <div className="app-shell">
       <Typography.Title level={2}>订单列表</Typography.Title>
-      <Space direction="vertical" className="order-list-search">
-        <Search
-          placeholder="搜索订单号、产品名称、负责人或状态"
-          allowClear
-          enterButton="搜索"
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          onSearch={(value) => setKeyword(value)}
-        />
-      </Space>
+
+      <div className="filter-bar">
+        <Space size={12} wrap>
+          <Input
+            placeholder="订单号"
+            allowClear
+            prefix={<SearchOutlined />}
+            className="filter-input"
+            value={filters.orderId}
+            onChange={(e) => setFilters((prev) => ({ ...prev, orderId: e.target.value }))}
+          />
+          <Input
+            placeholder="产品名称"
+            allowClear
+            prefix={<SearchOutlined />}
+            className="filter-input"
+            value={filters.product}
+            onChange={(e) => setFilters((prev) => ({ ...prev, product: e.target.value }))}
+          />
+          <Input
+            placeholder="负责人"
+            allowClear
+            prefix={<SearchOutlined />}
+            className="filter-input"
+            value={filters.owner}
+            onChange={(e) => setFilters((prev) => ({ ...prev, owner: e.target.value }))}
+          />
+          <Select
+            placeholder="全部状态"
+            allowClear
+            className="filter-select"
+            value={filters.status || undefined}
+            onChange={(value) => setFilters((prev) => ({ ...prev, status: value || '' }))}
+            options={statusOptions}
+          />
+          {hasFilter && (
+            <Button icon={<ReloadOutlined />} onClick={handleReset}>
+              重置
+            </Button>
+          )}
+        </Space>
+      </div>
+
       <Table columns={columns} dataSource={filteredOrders} pagination={{ pageSize: 8 }} />
     </div>
   );
