@@ -1,15 +1,224 @@
+/* ===== 页头 ===== */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e8ecf1;
+}
+
+.page-header-left {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.page-title {
+  margin: 0 !important;
+  font-weight: 500 !important;
+  font-size: 22px !important;
+  color: #2c3e50 !important;
+  letter-spacing: 0.01em;
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: #94a3b8;
+  letter-spacing: 0.03em;
+}
+
+.header-decoration {
+  display: block;
+  width: 36px;
+  height: 2px;
+  background: linear-gradient(90deg, #7c9ec0 0%, #a8c8e8 100%);
+  border-radius: 1px;
+  margin-top: 6px;
+  opacity: 0.6;
+}
+
+/* ===== 筛选栏 — 毛玻璃清透 ===== */
 .filter-bar {
-  background: #fafafa;
-  border: 1px solid #f0f0f0;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
   padding: 16px 20px;
   margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .filter-input {
   width: 200px;
+  border-radius: 8px;
+
+  .ant-input {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: #e2e8f0;
+    color: #334155;
+    border-radius: 8px;
+
+    &::placeholder {
+      color: #94a3b8;
+    }
+
+    &:hover {
+      border-color: #94a3b8;
+    }
+
+    &:focus,
+    &.ant-input-focused {
+      border-color: #7c9ec0;
+      box-shadow: 0 0 0 2px rgba(124, 158, 192, 0.12);
+    }
+  }
+
+  .ant-input-prefix {
+    color: #94a3b8;
+  }
 }
 
 .filter-select {
   width: 140px;
+
+  .ant-select-selector {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-color: #e2e8f0 !important;
+    border-radius: 8px !important;
+    color: #334155 !important;
+
+    &:hover {
+      border-color: #94a3b8 !important;
+    }
+  }
+
+  &.ant-select-focused .ant-select-selector {
+    border-color: #7c9ec0 !important;
+    box-shadow: 0 0 0 2px rgba(124, 158, 192, 0.12) !important;
+  }
+}
+
+.filter-reset {
+  color: #64748b;
+  border-color: #e2e8f0;
+  border-radius: 8px;
+
+  &:hover {
+    color: #475569 !important;
+    border-color: #94a3b8 !important;
+    background: #f8fafc !important;
+  }
+}
+
+/* ===== 表格 ===== */
+.order-table {
+  border-radius: 12px;
+  overflow: hidden;
+
+  /* 表头 */
+  .ant-table-thead > tr > th {
+    background: #f8fafc !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    font-size: 12px !important;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-bottom: 1px solid #e8ecf1 !important;
+    padding: 12px 16px !important;
+
+    &::before {
+      display: none !important;
+    }
+  }
+
+  /* 行 */
+  .ant-table-tbody > tr > td {
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding: 14px 16px !important;
+    color: #334155;
+    transition: background 0.2s ease;
+  }
+
+  /* hover — 浅灰底 */
+  .ant-table-tbody > tr:hover > td {
+    background: #f8fafc !important;
+  }
+
+  /* 斑马纹 */
+  .ant-table-tbody > tr:nth-child(even) > td {
+    background: #fafbfc;
+  }
+
+  .ant-table-tbody > tr:nth-child(even):hover > td {
+    background: #f8fafc !important;
+  }
+}
+
+/* 详情链接 */
+.detail-link {
+  color: #5b7fa5;
+  font-size: 13px;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #3d6a96;
+  }
+
+  .link-arrow {
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    transform: translateX(-4px);
+    display: inline-block;
+  }
+
+  &:hover .link-arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 分页 */
+.order-pagination {
+  .ant-pagination-item-active {
+    background: #7c9ec0 !important;
+    border-color: #7c9ec0 !important;
+
+    a {
+      color: #fff !important;
+    }
+  }
+
+  .ant-pagination-item:hover {
+    border-color: #7c9ec0 !important;
+
+    a {
+      color: #7c9ec0 !important;
+    }
+  }
+}
+
+/* 空状态 */
+.empty-state {
+  padding: 48px 0;
+  color: #94a3b8;
+
+  .empty-icon {
+    font-size: 36px;
+    display: block;
+    margin-bottom: 12px;
+    opacity: 0.7;
+  }
+
+  p {
+    font-size: 15px;
+    margin-bottom: 4px;
+    color: #64748b;
+  }
+
+  .empty-hint {
+    font-size: 12px;
+    color: #94a3b8;
+  }
 }
