@@ -1,9 +1,9 @@
-import { Button, Input, Select, Space, Table, Tag, Typography } from 'antd';
+import { Button, Input, Popconfirm, Select, Space, Table, Tag, Typography, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
+import { SearchOutlined, ReloadOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { orders, statusMap, type Order, type OrderStatus } from '../../data/orders';
+import { orders as initialOrders, statusMap, type Order, type OrderStatus } from '../../data/orders';
 import './index.less';
 
 /* 清透色板 */
@@ -14,69 +14,31 @@ const refinedStatus: Record<OrderStatus, { color: string; bg: string }> = {
   '已取消': { color: '#b0a0a0', bg: '#f6f3f3' },
 };
 
-const columns: ColumnsType<Order> = [
-  {
-    title: '订单号',
-    dataIndex: 'orderId',
-    key: 'orderId',
-    width: 130,
-  },
-  {
-    title: '产品名称',
-    dataIndex: 'product',
-    key: 'product',
-    width: 140,
-  },
-  {
-    title: '价格',
-    dataIndex: 'price',
-    key: 'price',
-    width: 100,
-  },
-  {
-    title: '负责人',
-    dataIndex: 'owner',
-    key: 'owner',
-    width: 90,
-  },
-  {
-    title: '时间',
-    dataIndex: 'time',
-    key: 'time',
-    sorter: (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime(),
-  },
-  {
-    title: '状态',
-    dataIndex: 'status',
-    key: 'status',
-    width: 90,
-    render: (status: Order['status']) => {
-      const s = refinedStatus[status];
-      return (
-        <Tag
-          style={{
-            color: s.color,
-            background: s.bg,
-            border: `1px solid ${s.color}20`,
-            borderRadius: 4,
-          }}
-        >
-          {status}
-        </Tag>
-      );
-    },
-  },
-  {
-    title: '操作',
-    key: 'action',
-    width: 100,
-    render: (_, record) => (
-      <Link to={`/order/${record.orderId}`} className="detail-link">
-        查看详情 <span className="link-arrow">→</span>
-      </Link>
-    ),
-  },
+const products = [
+  '智能手表', '蓝牙耳机', '机械键盘', '无线充电器', '便携显示器',
+  '高清摄像头', '电竞鼠标', '商务背包', '空气净化器', '笔记本支架',
 ];
+const owners = ['张三', '李四', '王五', '赵六', '钱七'];
+
+let idCounter = initialOrders.length + 1;
+const generateOrder = (): Order => {
+  const idx = idCounter++;
+  const statuses: OrderStatus[] = ['待处理', '已完成', '进行中', '已取消'];
+  const price = (Math.random() * 900 + 100).toFixed(2);
+  const time = new Date().toLocaleString();
+  return {
+    key: `order-${idx}`,
+    orderId: `ORD-${1000 + idx}`,
+    product: products[idx % products.length],
+    price: `¥${price}`,
+    owner: owners[idx % owners.length],
+    time,
+    status: statuses[idx % statuses.length],
+    description: `该订单包含 ${Math.ceil(Math.random() * 3)} 件优质电子商品，预计配送时效为 2-4 个工作日。`,
+    totalItems: 1 + (idx % 4),
+    shippingAddress: '上海市徐汇区漕溪北路88号',
+  };
+};
 
 const statusOptions: { value: OrderStatus | ''; label: string }[] = [
   { value: '', label: '全部状态' },
@@ -87,6 +49,7 @@ const statusOptions: { value: OrderStatus | ''; label: string }[] = [
 ];
 
 export default function OrderList() {
+  const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [filters, setFilters] = useState({
     orderId: '',
     product: '',
@@ -103,14 +66,103 @@ export default function OrderList() {
         const statusMatch = !filters.status || order.status === filters.status;
         return orderIdMatch && productMatch && ownerMatch && statusMatch;
       }),
-    [filters],
+    [filters, orders],
   );
 
   const handleReset = () => {
     setFilters({ orderId: '', product: '', owner: '', status: '' });
   };
 
+  const handleAdd = () => {
+    const newOrder = generateOrder();
+    setOrders((prev) => [newOrder, ...prev]);
+    message.success(`订单 ${newOrder.orderId} 已新增`);
+  };
+
+  const handleDelete = (orderId: string) => {
+    setOrders((prev) => prev.filter((o) => o.orderId !== orderId));
+    message.success(`订单 ${orderId} 已删除`);
+  };
+
   const hasFilter = filters.orderId || filters.product || filters.owner || filters.status;
+
+  const columns: ColumnsType<Order> = [
+    {
+      title: '订单号',
+      dataIndex: 'orderId',
+      key: 'orderId',
+      width: 130,
+    },
+    {
+      title: '产品名称',
+      dataIndex: 'product',
+      key: 'product',
+      width: 140,
+    },
+    {
+      title: '价格',
+      dataIndex: 'price',
+      key: 'price',
+      width: 100,
+    },
+    {
+      title: '负责人',
+      dataIndex: 'owner',
+      key: 'owner',
+      width: 90,
+    },
+    {
+      title: '时间',
+      dataIndex: 'time',
+      key: 'time',
+      sorter: (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime(),
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      key: 'status',
+      width: 90,
+      render: (status: Order['status']) => {
+        const s = refinedStatus[status];
+        return (
+          <Tag
+            style={{
+              color: s.color,
+              background: s.bg,
+              border: `1px solid ${s.color}20`,
+              borderRadius: 4,
+            }}
+          >
+            {status}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: '操作',
+      key: 'action',
+      width: 180,
+      render: (_, record) => (
+        <Space size={8}>
+          <Link to={`/order/${record.orderId}`} className="detail-link">
+            查看详情 <span className="link-arrow">→</span>
+          </Link>
+          <Popconfirm
+            title="确认删除"
+            description={`确定要删除订单 ${record.orderId} 吗？`}
+            onConfirm={() => handleDelete(record.orderId)}
+            okText="确认删除"
+            cancelText="取消"
+            okButtonProps={{ danger: true }}
+          >
+            <Button type="link" size="small" danger icon={<DeleteOutlined />}>
+              删除
+            </Button>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
 
   return (
     <div className="app-shell">
@@ -125,7 +177,9 @@ export default function OrderList() {
           </span>
         </div>
         <div className="page-header-right">
-          <span className="header-decoration" />
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+            新增订单
+          </Button>
         </div>
       </div>
 
